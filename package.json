@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:index": "node scripts/generate-index.mjs",
+    "qa:search": "node scripts/search-qa.mjs",
+    "prepublish:check": "node --check app.js && node --check serve.mjs && node --check scripts/generate-index.mjs && node --check scripts/search-qa.mjs && npm run generate:index && npm run qa:search"
+  }
+}
