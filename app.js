@@ -58,8 +58,13 @@ async function init() {
     bindEvents();
     applyRouteFromHash({ replaceIfEmpty: true });
   } catch (error) {
-    els.resultCount.textContent = "読み込み失敗";
-    els.resultList.innerHTML = `<div class="empty-results">検索インデックスを読み込めませんでした。<br>${escapeHtml(error.message)}</div>`;
+    const offlineMessage = "オフラインです。接続後に再読み込みしてください。";
+    els.resultCount.textContent = navigator.onLine ? "読み込み失敗" : "オフライン";
+    els.resultList.innerHTML = `<div class="empty-results">${
+      navigator.onLine
+        ? `検索インデックスを読み込めませんでした。<br>${escapeHtml(error.message)}`
+        : offlineMessage
+    }</div>`;
   }
 }
 
@@ -359,6 +364,7 @@ function renderDetail() {
       </div>
     </div>
     ${renderDetailCards(item)}
+    ${videosSection(item)}
     ${relatedGuidesSection(item)}
   `;
 
@@ -578,6 +584,46 @@ function relatedGuidesSection(item) {
       </div>
     </details>
   `;
+}
+
+function videosSection(item) {
+  const videos = (item.videos || []).filter((video) => video && video.provider === "youtube" && video.youtubeId);
+  if (!videos.length) return "";
+  return `
+    <details class="detail-card video-card" data-section-key="videos" open>
+      <summary><h3>実演動画</h3></summary>
+      <div class="video-list">
+        ${videos.map(videoHtml).join("")}
+      </div>
+    </details>
+  `;
+}
+
+function videoHtml(video) {
+  const title = video.title || "実演動画";
+  const fallbackUrl = video.fallbackUrl || video.youtubeUrl || `https://www.youtube.com/watch?v=${video.youtubeId}`;
+  return `
+    <article class="video-item">
+      <div class="video-frame">
+        <iframe
+          src="${escapeHtml(youtubeEmbedUrl(video.youtubeId))}"
+          title="${escapeHtml(title)}"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen></iframe>
+      </div>
+      <div class="video-meta">
+        <strong>${highlightText(title)}</strong>
+        <span>出典: ${escapeHtml(video.source || "YouTube")}</span>
+      </div>
+      <a class="youtube-link primary-action" href="${escapeHtml(fallbackUrl)}" target="_blank" rel="noreferrer">YouTubeで見る</a>
+    </article>
+  `;
+}
+
+function youtubeEmbedUrl(youtubeId) {
+  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}`;
 }
 
 function groupRelatedGuides(guides) {

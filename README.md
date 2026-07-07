@@ -9,6 +9,10 @@
 - `app.js`
 - `data/search-index.json`
 - `config/normalization-map.json`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `offline.html`
+- `icons/*.png`
 - 必要なPDF: `manuals/house-cleaning-manual/exports/*.pdf`
 
 公開先で検索インデックスを再生成する運用を行う場合のみ、次も含めます。
@@ -63,6 +67,18 @@ npm run prepublish:check
 
 このコマンドで構文確認、検索インデックス生成、検索QAをまとめて実行します。
 
+## PWA確認
+
+GitHub PagesなどHTTPS上で公開した後に確認します。
+
+- ブラウザの開発者ツールで `manifest.webmanifest` が読み込まれる
+- `service-worker.js` が登録される
+- Application の Manifest にアプリ名とアイコンが表示される
+- スマホブラウザでホーム画面へ追加できる
+- ホーム画面から起動すると単独アプリ風に表示される
+- 初回表示後、主要画面がキャッシュから開ける
+- PDFはキャッシュ対象外
+
 ## 検索インデックス更新
 
 ```powershell
@@ -105,3 +121,4 @@ node manuals-webapp/serve.mjs
 - 関連ガイドリンクが切れていない
 - ブラウザ戻る/進むが動く
 - スマホ幅で表示が崩れない
+- PWAとしてホーム画面に追加できる

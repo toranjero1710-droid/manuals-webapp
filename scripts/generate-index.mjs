@@ -9,6 +9,7 @@ const appRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(appRoot, "data");
 const outputFile = path.join(outputDir, "search-index.json");
 const normalizationFile = path.join(appRoot, "config", "normalization-map.json");
+const videoMetadataFile = path.join(appRoot, "config", "video-metadata.json");
 
 const guideRoots = [
   "house-cleaning-manual",
@@ -47,6 +48,14 @@ function toPosix(value) {
 async function loadNormalizationMap() {
   try {
     return JSON.parse(await readFile(normalizationFile, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+async function loadVideoMetadata() {
+  try {
+    return JSON.parse(await readFile(videoMetadataFile, "utf8"));
   } catch {
     return {};
   }
@@ -272,6 +281,7 @@ function aliasesForSearch(normalizationMap) {
 
 async function buildIndex() {
   const normalizationMap = await loadNormalizationMap();
+  const videoMetadata = await loadVideoMetadata();
   const items = [];
   for (const guideRoot of guideRoots) {
     const root = path.join(manualsRoot, guideRoot);
@@ -293,6 +303,7 @@ async function buildIndex() {
       const chemicals = normalizeList(frontmatter.chemicals, "chemicals", normalizationMap);
       const tools = normalizeList(frontmatter.tools, "tools", normalizationMap);
       const detailSections = extractDetailSections(body);
+      const videos = normalizeVideos(videoMetadata[id] || videoMetadata[path.basename(relPath, ".md")] || [], id);
 
       const item = {
         id,
@@ -329,6 +340,7 @@ async function buildIndex() {
           cautions: extractWarnings(body),
           sections: detailSections
         },
+        videos,
         searchableText: normalizeBodyForSearch([
           title,
           frontmatter.chapter_no || "",
@@ -342,6 +354,7 @@ async function buildIndex() {
           asArray(frontmatter.materials).join(" "),
           asArray(frontmatter.chemicals).join(" "),
           asArray(frontmatter.tools).join(" "),
+          videos.map((video) => video.title).join(" "),
           body
         ].join("\n"))
       };
@@ -382,6 +395,22 @@ async function buildIndex() {
   await mkdir(outputDir, { recursive: true });
   await writeFile(outputFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   return payload;
+}
+
+function normalizeVideos(videos, itemId) {
+  const list = Array.isArray(videos) ? videos : videos ? [videos] : [];
+  return list
+    .filter((video) => video && typeof video === "object")
+    .map((video) => ({
+      chapter: video.chapter || itemId,
+      title: String(video.title || "実演動画"),
+      youtubeUrl: String(video.youtubeUrl || ""),
+      youtubeId: String(video.youtubeId || ""),
+      fallbackUrl: String(video.fallbackUrl || video.youtubeUrl || ""),
+      provider: String(video.provider || "youtube"),
+      source: String(video.source || "YouTube")
+    }))
+    .filter((video) => video.provider === "youtube" && /^[A-Za-z0-9_-]{6,}$/.test(video.youtubeId));
 }
 
 buildIndex()
