@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..", "..");
 const manualsRoot = path.join(projectRoot, "manuals");
-const appRoot = path.join(projectRoot, "manuals-webapp");
+const appRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(appRoot, "data");
 const outputFile = path.join(outputDir, "search-index.json");
 const normalizationFile = path.join(appRoot, "config", "normalization-map.json");
@@ -36,6 +36,7 @@ const detailSectionSpecs = [
   { key: "cautions", label: "注意事項", patterns: [/注意事項/, /使用上の注意/, /安全/, /注意が必要/] },
   { key: "ng", label: "NG事項", patterns: [/失敗例/, /やってはいけない/, /混ぜてはいけない/, /NG/] },
   { key: "finish", label: "仕上げ確認", patterns: [/仕上げ/, /最終確認/, /乾拭き/] },
+  { key: "faq", label: "FAQ", patterns: [/FAQ/i, /よくある質問/] },
   { key: "checklist", label: "章末チェックリスト", patterns: [/チェックリスト/] }
 ];
 
@@ -217,6 +218,7 @@ function cleanLine(value) {
     .replace(/^#{1,4}\s*/, "")
     .replace(/^[-*]\s*/, "")
     .replace(/^\d+\.\s*/, "")
+    .replace(/!\[([^\]]*)]\([^)]+\)\s*/g, "$1 ")
     .replace(/\*\*/g, "")
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/<\/?[^>]+>/g, "")

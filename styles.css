@@ -427,6 +427,36 @@ mark {
   margin-top: 7px;
 }
 
+.detail-table-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #25313d;
+  font-size: 14px;
+}
+
+.detail-table th,
+.detail-table td {
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.detail-table th {
+  background: #edf8f5;
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.detail-table tbody tr:nth-child(even) {
+  background: var(--panel-soft);
+}
+
 .related-guide-list {
   display: grid;
   gap: 8px;

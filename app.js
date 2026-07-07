@@ -463,7 +463,7 @@ function normalizedDetailSections(item) {
   if (!sectionMap.has("cautions") && item.detail?.cautions?.length) {
     sectionMap.set("cautions", { key: "cautions", label: "注意事項", items: item.detail.cautions });
   }
-  return ["precheck", "tools", "chemicals", "steps", "cautions", "ng", "finish", "checklist"]
+  return ["precheck", "tools", "chemicals", "steps", "cautions", "ng", "finish", "faq", "checklist"]
     .map((key) => sectionMap.get(key))
     .filter(Boolean);
 }
@@ -473,11 +473,80 @@ function detailCard(section) {
   return `
     <details class="detail-card" data-section-key="${escapeHtml(section.key || "")}"${open}>
       <summary><h3>${highlightText(section.label)}</h3></summary>
-      <ul class="detail-list">
-        ${section.items.map((value) => `<li>${highlightText(cleanLine(value))}</li>`).join("")}
-      </ul>
+      ${renderSectionItems(section.items)}
     </details>
   `;
+}
+
+function renderSectionItems(items = []) {
+  const groups = [];
+  let current = null;
+  for (const item of items) {
+    const line = cleanLine(item);
+    if (!line) continue;
+    const type = isTableLine(line) ? "table" : "list";
+    if (!current || current.type !== type) {
+      current = { type, lines: [] };
+      groups.push(current);
+    }
+    current.lines.push(line);
+  }
+  return groups.map((group) => (group.type === "table" ? renderTable(group.lines) : renderList(group.lines))).join("");
+}
+
+function renderTable(lines) {
+  const rows = lines
+    .map(parseTableLine)
+    .filter((row) => row.length >= 2 && row.some(Boolean));
+  if (!rows.length) return "";
+  const [head, ...body] = rows;
+  return `
+    <div class="detail-table-wrap">
+      <table class="detail-table">
+        <thead><tr>${head.map((cell) => `<th scope="col">${highlightText(cell)}</th>`).join("")}</tr></thead>
+        <tbody>
+          ${body.map((row) => `<tr>${padRow(row, head.length).map((cell) => `<td>${highlightText(cell)}</td>`).join("")}</tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderList(lines) {
+  return `<ul class="detail-list">${lines.map((value) => `<li>${highlightText(value)}</li>`).join("")}</ul>`;
+}
+
+function isTableLine(value) {
+  const line = String(value).trim();
+  if (!line.includes("|")) return false;
+  if (/^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?$/.test(line)) return false;
+  return parseTableLine(line).length >= 2;
+}
+
+function parseTableLine(value) {
+  return String(value)
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cleanTableCell(cell));
+}
+
+function cleanTableCell(value) {
+  return collapseRepeatedText(cleanLine(value).replace(/^!\s*/, ""));
+}
+
+function padRow(row, length) {
+  return Array.from({ length }, (_, index) => row[index] || "");
+}
+
+function collapseRepeatedText(value) {
+  const parts = String(value).trim().split(/\s+/).filter(Boolean);
+  if (parts.length % 2 !== 0 || parts.length < 2) return value;
+  const mid = parts.length / 2;
+  const first = parts.slice(0, mid).join(" ");
+  const second = parts.slice(mid).join(" ");
+  return first === second ? first : value;
 }
 
 function shouldOpenSection(section) {
@@ -616,8 +685,10 @@ function cleanLine(value) {
     .replace(/^#{1,4}\s*/, "")
     .replace(/^[-*]\s*/, "")
     .replace(/^\d+\.\s*/, "")
+    .replace(/!\[([^\]]*)]\([^)]+\)\s*/g, "$1 ")
     .replace(/\*\*/g, "")
     .replace(/<\/?[^>]+>/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
