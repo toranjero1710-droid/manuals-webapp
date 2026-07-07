@@ -682,6 +682,7 @@ function manualAssetHref(assetPath) {
 
 function cleanLine(value) {
   return String(value)
+    .replace(/^!\s*(?![A-Za-z0-9_-])/, "")
     .replace(/^#{1,4}\s*/, "")
     .replace(/^[-*]\s*/, "")
     .replace(/^\d+\.\s*/, "")
