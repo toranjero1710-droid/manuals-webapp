@@ -9,5 +9,17 @@
       "provider": "youtube",
       "source": "YouTube / お掃除職人きよきよ"
     }
+  ],
+  "manuals/house-cleaning-manual/chapter07-toilet-bowl": [
+    {
+      "chapter": "manuals/house-cleaning-manual/chapter07-toilet-bowl",
+      "title": "トイレ便器クリーニング実演",
+      "description": "トイレ便器・尿石・黄ばみ・黒ずみ清掃の参考実演",
+      "youtubeUrl": "https://youtu.be/DAIafhUzXsI?si=4xphmDfXNp3AXklT",
+      "youtubeId": "DAIafhUzXsI",
+      "fallbackUrl": "https://youtu.be/DAIafhUzXsI?si=4xphmDfXNp3AXklT",
+      "provider": "youtube",
+      "source": "YouTube / お掃除職人きよきよ"
+    }
   ]
 }

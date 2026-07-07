@@ -615,6 +615,7 @@ function videoHtml(video) {
       </div>
       <div class="video-meta">
         <strong>${highlightText(title)}</strong>
+        ${video.description ? `<p>${highlightText(video.description)}</p>` : ""}
         <span>出典: ${escapeHtml(video.source || "YouTube")}</span>
       </div>
       <a class="youtube-link primary-action" href="${escapeHtml(fallbackUrl)}" target="_blank" rel="noreferrer">YouTubeで見る</a>

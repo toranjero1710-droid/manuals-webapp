@@ -404,6 +404,7 @@ function normalizeVideos(videos, itemId) {
     .map((video) => ({
       chapter: video.chapter || itemId,
       title: String(video.title || "実演動画"),
+      description: String(video.description || ""),
       youtubeUrl: String(video.youtubeUrl || ""),
       youtubeId: String(video.youtubeId || ""),
       fallbackUrl: String(video.fallbackUrl || video.youtubeUrl || ""),
